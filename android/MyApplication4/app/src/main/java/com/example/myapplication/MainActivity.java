@@ -24,7 +24,6 @@ import org.xutils.http.RequestParams;
 import org.xutils.x;
 
 import java.io.File;
-import java.util.Objects;
 
 public class MainActivity extends AppCompatActivity {
     private Button btn_choose,btn_commit;
@@ -37,6 +36,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         initView();
+//        Picture selection
         btn_choose.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -53,9 +53,9 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View view) {
                 textView.setText("waiting");
                 RequestParams params = new RequestParams("http://192.168.1.171:5003/");
-//                表单上传图片
+//                Upload image form
                 params.setMultipart(true);
-//                实际图片路径
+//                Actual image path
                 String really_path = null;
                 String[] proj = { MediaStore.Images.Media.DATA };
                 Cursor cursor = getContentResolver().query(uri, proj, null, null, null);
@@ -66,7 +66,7 @@ public class MainActivity extends AppCompatActivity {
                 }
                 assert really_path != null;
                 Log.i("url:",really_path);
-//                加载表单参数
+//                Load form parameters
                 params.addBodyParameter("file", new File(really_path), null, "test.jpg");
                 x.http().post(params, new Callback.CommonCallback<String>() {
                     @Override
@@ -79,7 +79,7 @@ public class MainActivity extends AppCompatActivity {
                         Toast.makeText(x.app(), ex.getMessage(), Toast.LENGTH_LONG).show();
                     }
 
-                    // 不管成功或者失败最后都会回调该接口
+                    // The interface will be called back regardless of success or failure
                     @Override
                     public void onFinished() {
                     }
@@ -90,7 +90,7 @@ public class MainActivity extends AppCompatActivity {
                         try {
                             textView.setText(msg);
                             jsonObject = new JSONObject(msg);
-                            // TODO 业务处理
+                            // TODO print result
                         } catch (JSONException e) {
                             Log.e("evmsapp", e.getMessage());
                         }
@@ -109,9 +109,9 @@ public class MainActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == 2) {
-            // 从相册返回的数据
+//            Data returned from the album
             if (data != null) {
-                // 得到图片的全路径
+                // Get the full path of the picture
                 uri = data.getData();
                 imageView.setImageURI(uri);
             }

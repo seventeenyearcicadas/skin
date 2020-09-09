@@ -23,42 +23,47 @@ from tensorflow_core.python.keras.applications.vgg16 import preprocess_input
 
 
 
-
+"""
+Initialization: All Flask must create program instances,
+The web server uses the wsgi protocol to forward all client requests to this program instance
+The program instance is an object of Flask, which is usually instantiated in the following way
+The Flask class has only one parameter that must be specified, that is, the name of the main module or package of the program. __name__ is a system variable, which refers to the file name of the py file
+"""
 app = Flask(__name__)
-
+# Define the interface
 @app.route('/', methods=['POST'])
 def get_frame():
     start_time = time.time()
     upload_file = request.files['file']
     old_file_name = upload_file.filename
     if upload_file:
-        # 接收图片，保存图片
+        # Receive pictures, save pictures
         file_path = os.path.join('./', old_file_name)
         upload_file.save(file_path)
         print("success")
         print('file saved to %s' % file_path)
-        # 图片打开及格式转换
+        # Picture opening and format conversion
         img_path = "./test.jpg"
         img = image.load_img(img_path, target_size=(224, 224))
         x = image.img_to_array(img)
         x = np.expand_dims(x, axis=0)
         x = preprocess_input(x)
-        # 加载模型
+        # Load model
         model = load_model('./model/model_weight.h5')
-        # 预测图片
+        # Prediction picture
         preds = model.predict(x)
         print(preds[0][0])
-        # 图片种类
+        # Picture type
         labels = ['acne', 'eczema',  'healthy',  'psoriasis']
-        # 返回结果
+        # Return result
         dict = {}
-        # 将预测的结果封装为字典
+        # Encapsulate the predicted result as a dictionary
         for index, label in enumerate(labels):
             dict[label] = preds[0][index]
         print(dict)
         duration = time.time() - start_time
         print('duration:[%.0fms]' % (duration * 1000))
-        # 格式化返回
+        # Format return
         return jsonify(str(dict))
     else:
         return 'failed'
@@ -67,5 +72,5 @@ def get_test():
     return 'hello world tang'
 
 if __name__ == "__main__":
-    # 将host设置为0.0.0.0，则外网用户也可以访问到这个服务
+    # Set the host to 0.0.0.0, then external users can also access this service
     app.run(host="0.0.0.0", port=5003, debug=True)
