@@ -19,37 +19,48 @@ epochs = 1
 train_data_dir = '../TrainData'
 validation_data_dir = '../TestData'
 
-#Real-time data enhancement generates batches of tensor image data
+#Data augmentation 
 datagen = ImageDataGenerator(horizontal_flip=True,vertical_flip=True, featurewise_center=True, samplewise_center=True, featurewise_std_normalization=True, samplewise_std_normalization=True)
 
-# Take the folder path as a parameter, generate data after data promotion/normalization, and generate batch data infinitely in an infinite loop
-#Training set data
+
+#Generate the training set
 train_generator = datagen.flow_from_directory(
     '../TrainData',
     target_size=(224, 224),
     class_mode='categorical',
     batch_size=batch_size)
 
-#Validation set data
+#Generate the Validation set
 validation_generator = datagen.flow_from_directory(
     '../TestData',
     target_size=(224, 224),
     class_mode='categorical',
     batch_size=batch_size,
     shuffle=True)
-# VGG16 model, weights are trained by ImageNet，Does not include the top fully connected layer
+	
+# load the original VGG16 model provided by Keras, weights are trained on the ImageNet dataset. Remove the top fully connected layer
 base_model = applications.VGG16(weights="imagenet",include_top=False,input_shape=(img_width,img_height,3))
 
-# Freeze the layer
+# Freeze the weights in each layer
 for layer in base_model.layers:
     layer.trainable = False
-# New top model
+	
+# Create New Sequential model
 top_model = Sequential()
+
+# Add the Flatten layer
 top_model.add(Flatten(input_shape=base_model.output_shape[1:]))
+
+# Add the Dense layer with units, activation function and regurization method setting 
 top_model.add(Dense(2048, activation='relu', kernel_regularizer=regularizers.l2(0.001)))
+
+# Add the Dropout layer with possibility of 0.5 
 top_model.add(Dropout(0.5))
+
+# Add the Dense layer and set parameters to suit our problem
 top_model.add(Dense(4, activation='softmax'))
-# Splicing model
+
+# Splice model
 inputs = base_model.input
 outputs = top_model(base_model.output)
 model = Model(inputs, outputs)
@@ -58,17 +69,21 @@ model = Model(inputs, outputs)
 model.summary()
 
 print('[INFO] compiling model')
-#Compile model
+
+#Compile model with choosing loss function and optimizer and metrics 
 model.compile(loss=keras.losses.categorical_crossentropy,
               optimizer=keras.optimizers.Adam(learning_rate=0.01, beta_1=0.9, beta_2=0.999),
               metrics=['accuracy'])
+			  
 print('[INFO] training model')
-# Display network graph, tensor index changes, and tensor distribution
+
+# Display network graph with TensorBoard
 tbCallBack = TensorBoard(log_dir="./logs",update_freq='batch', histogram_freq=0,write_graph=True, write_images=True)
 
 #Model training
 model.fit_generator(generator=train_generator, steps_per_epoch=1000 / batch_size, epochs=5,
                     validation_data=validation_generator, validation_steps=250 / batch_size, callbacks=[tbCallBack])
+					
 # Save model
 model.save('./model/model_weight.h5')
 

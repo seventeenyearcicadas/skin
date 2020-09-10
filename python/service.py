@@ -1,15 +1,10 @@
-# author:think
+# author:Xiaohan MA
 # datetime:2020/8/5 14:12
 # software: PyCharm
 
-"""
-文件说明：
 
-"""
 # coding:utf-8
-# 2019/10/22 16:01
-# huihui
-# ref:
+
 import os
 import time
 
@@ -23,13 +18,9 @@ from tensorflow_core.python.keras.applications.vgg16 import preprocess_input
 
 
 
-"""
-Initialization: All Flask must create program instances,
-The web server uses the wsgi protocol to forward all client requests to this program instance
-The program instance is an object of Flask, which is usually instantiated in the following way
-The Flask class has only one parameter that must be specified, that is, the name of the main module or package of the program. __name__ is a system variable, which refers to the file name of the py file
-"""
+
 app = Flask(__name__)
+
 # Define the interface
 @app.route('/', methods=['POST'])
 def get_frame():
@@ -50,10 +41,10 @@ def get_frame():
         x = preprocess_input(x)
         # Load model
         model = load_model('./model/model_weight.h5')
-        # Prediction picture
+        # Predict picture
         preds = model.predict(x)
         print(preds[0][0])
-        # Picture type
+        # Lable of images 
         labels = ['acne', 'eczema',  'healthy',  'psoriasis']
         # Return result
         dict = {}
@@ -63,13 +54,11 @@ def get_frame():
         print(dict)
         duration = time.time() - start_time
         print('duration:[%.0fms]' % (duration * 1000))
-        # Format return
+        # Format the result returned
         return jsonify(str(dict))
     else:
         return 'failed'
-@app.route('/test', methods=['POST'])
-def get_test():
-    return 'hello world tang'
+
 
 if __name__ == "__main__":
     # Set the host to 0.0.0.0, then external users can also access this service

@@ -64,17 +64,3 @@ def get_pic():
         psoriasis = 0
 get_pic()
 
-
-
-
-# label = decode_predictions(predict_result)
-# # retrieve the most likely result, e.g. highest probability
-# label = label[0][0]
-# # print the classification
-# print('%s (%.2f%%)' % (label[1], label[2] * 100))
-# 解析预测结果
-# label = decode_predictions(predict_result)
-#
-# # 打印出三个概率最大的分类
-# for idx in range(0, 3):
-#     print("类别：%s        概率：%0.4f"%(label[0][idx][1], label[0][idx][2]))
